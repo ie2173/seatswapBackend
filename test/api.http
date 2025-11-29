@@ -1,0 +1,87 @@
+### Variables
+@baseUrl = http://localhost:3000
+@address = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+# To generate a token, run: bun run test/generateSig.ts
+# Then copy the token value here:
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHhmMzlmZDZlNTFhYWQ4OGY2ZjRjZTZhYjg4MjcyNzljZmZmYjkyMjY2IiwiY2hhaW5JZCI6ODQ1MzIsImlhdCI6MTc2MzkyNDY1MywiZXhwIjoxNzYzOTI4MjUzfQ.NWXcQsT8aQmtTN0EJJaK2JD56VGwUZ4TgXUGHWOAh5s
+
+### Get Nonce
+POST {{baseUrl}}/auth/nonce
+Content-Type: application/json
+
+{
+  "address": "0x47dd61a239ad544f95d16ef3dbee88a4e7d0b73f"
+}
+
+### Verify Signature (replace message and signature with actual values)
+POST {{baseUrl}}/auth/verify
+Content-Type: application/json
+
+{
+  "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "message": "localhost wants you to sign in with your Ethereum account:\n0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb\n\nSign in with Ethereum to the app.\n\nURI: http://localhost\nVersion: 1\nChain ID: 84532\nNonce: f3132cc598c1f28f781a27d91d8bc118\nIssuedAt: 2025-11-18T00:00:00.000Z",
+  "signature": "0xYOUR_SIGNATURE_HERE"
+}
+
+### Logout (replace with actual JWT token)
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Test with invalid address
+POST {{baseUrl}}/auth/nonce
+Content-Type: application/json
+
+{
+  "address": "invalid-address"
+}
+
+### Test with missing address
+POST {{baseUrl}}/auth/nonce
+Content-Type: application/json
+
+{
+}
+
+### ========================================
+### Protected Routes (require authentication)
+### Run: bun run test/generateSig.ts to get token
+### ========================================
+
+### Create Deal (Protected)
+POST {{baseUrl}}/deals/list-tickets
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Lakers vs Warriors - Section 101 Row 5",
+  "quantity": 2,
+  "price": 250,
+  "escrowAddress": "0x1234567890123456789012345678901234567890"
+}
+
+### Add Email to Profile (Protected)
+POST {{baseUrl}}/users/add-email
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "test@example.com"
+}
+
+### Get All Open Deals (Public)
+GET {{baseUrl}}/deals/open-deals
+
+### Get Deal By ID (Public)
+GET {{baseUrl}}/deals/deal?dealId=YOUR_DEAL_ID_HERE
+
+### Get User Info (Public)
+POST {{baseUrl}}/users/info
+Content-Type: application/json
+
+{
+  "address": "{{address}}"
+}
+
+### Health Check
+GET {{baseUrl}}/health
