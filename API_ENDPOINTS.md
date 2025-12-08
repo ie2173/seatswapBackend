@@ -11,6 +11,7 @@ Base URL: `http://localhost:3000`
 ---
 
 ## Authentication Endpoints
+
 ### Verify JWT Token
 
 **POST** `/auth/verifyAuth`
@@ -53,6 +54,7 @@ Verify a JWT token and return its status and account address.
   "error": "JWT is invalid"
 }
 ```
+
 ### Get Nonce
 
 **POST** `/auth/nonce`

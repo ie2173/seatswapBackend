@@ -6,7 +6,9 @@ import { MongoDBConnection } from "@config";
 import { errorHandler, apiLimiter, corsMiddleware } from "@middleware";
 import { authRoutes, dealRoutes, userRoutes } from "@routes";
 
-dotenv.config();
+if (!process.env.RAILWAY_ENVIRONMENT) {
+  require("dotenv").config();
+}
 
 // express app
 const app = express();
