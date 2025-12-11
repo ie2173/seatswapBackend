@@ -18,8 +18,8 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 MongoDBConnection();
 
 // middleware
-app.use(apiLimiter);
 app.use(corsMiddleware);
+app.use(apiLimiter);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/auth", authRoutes);
