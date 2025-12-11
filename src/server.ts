@@ -36,6 +36,7 @@ app.get("/health", (req: Request, res: Response) => {
         "/nonce": "get - generate a nonce for SIWE authentication",
         "/verify": "post - verify SIWE message and signature",
         "/logout": "post - logout the user",
+        "VerifyAuth Middleware": "protect routes that require authentication",
       },
     },
   });
