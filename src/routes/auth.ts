@@ -1,5 +1,10 @@
 import express from "express";
-import { getNonce, verifySignature, logout, verifyJwt } from "@/controllers/auth";
+import {
+  getNonce,
+  verifySignature,
+  logout,
+  verifyJwt,
+} from "@/controllers/auth";
 import { authLimiter } from "@/middleware";
 
 const router = express.Router();

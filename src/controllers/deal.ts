@@ -24,11 +24,11 @@ export const createTicketDeal = async (
   req: ExpressRequestWithUser,
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
-  const { title, quantity, price, escrowAddress } = req.body;
+  const { title, quantity, price, escrowAddress, contractId } = req.body;
   const address = req.user?.address;
 
   // check that all vars are included in req.body
-  if (!title || !quantity || !price || !escrowAddress) {
+  if (!title || !quantity || !price || !escrowAddress || !contractId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -46,6 +46,7 @@ export const createTicketDeal = async (
     // Create new deal document
     const newDeal = new Deal({
       title,
+      contractId,
       quantity,
       price,
       seller: user._id,

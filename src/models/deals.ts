@@ -3,6 +3,7 @@ import { unique } from "viem/chains";
 
 const dealSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  contractId: { type: Number },
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
