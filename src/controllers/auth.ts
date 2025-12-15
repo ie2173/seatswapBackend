@@ -190,18 +190,29 @@ export const verifyJwt = (
   req: ExpressRequest,
   res: ExpressResponse
 ): ExpressResponse => {
-  const { token } = req.body;
+  // Accept token either in the request body (`token`) or in the
+  // `Authorization: Bearer <token>` header. Frontend often sends the
+  // JWT in the Authorization header, so support that to avoid 400 errors.
+  let { token } = req.body as { token?: string };
+  if (!token) {
+    const authHeader = req.get("authorization");
+    if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+      token = authHeader.slice(7).trim();
+    }
+  }
+
   if (!token) {
     return res.status(400).json({ error: "Token is required" });
   }
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token as string, process.env.JWT_SECRET);
     // If verification succeeds, token is valid
     return res.status(200).json({
       status: "valid",
-      address: decoded.address,
-      chainId: decoded.chainId,
-      isAdmin: decoded.isAdmin || false,
+      address: (decoded as any).address,
+      chainId: (decoded as any).chainId,
+      isAdmin: (decoded as any).isAdmin || false,
     });
   } catch (error) {
     if (error.name === "TokenExpiredError") {
