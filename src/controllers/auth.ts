@@ -66,7 +66,13 @@ export const verifySignature = async (
       .split(",")
       .map((d) => d.trim())
       .filter(Boolean)
-      .map((d) => d.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").toLowerCase());
+      .map((d) =>
+        d
+          .replace(/^https?:\/\//i, "")
+          .replace(/^www\./i, "")
+          .replace(/\/$/, "")
+          .toLowerCase()
+      );
 
     // In production, explicitly disallow localhost and loopback addresses.
     if (process.env.NODE_ENV === "production") {
@@ -84,7 +90,10 @@ export const verifySignature = async (
       .toLowerCase();
 
     if (!allowed.includes(messageDomainNormalized)) {
-      console.warn("SIWE domain mismatch", { messageDomain: siweMessage.domain, allowed });
+      console.warn("SIWE domain mismatch", {
+        messageDomain: siweMessage.domain,
+        allowed,
+      });
       return res.status(400).json({ error: "Invalid domain" });
     }
     // Nonce - check against nonce store
