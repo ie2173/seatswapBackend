@@ -58,8 +58,33 @@ export const verifySignature = async (
     }
 
     // Domain
-    const expectedDomain = process.env.SIWE_DOMAIN || "localhost";
-    if (siweMessage.domain !== expectedDomain) {
+    // Allow configuring one or more allowed domains via SIWE_DOMAIN env var (comma-separated).
+    // Normalize domains by removing protocol, www and trailing slashes so values like
+    // `https://seatswap.net` or `seatswap.net` both match.
+    const rawAllowed = process.env.SIWE_DOMAIN || "localhost";
+    let allowed = rawAllowed
+      .split(",")
+      .map((d) => d.trim())
+      .filter(Boolean)
+      .map((d) => d.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "").toLowerCase());
+
+    // In production, explicitly disallow localhost and loopback addresses.
+    if (process.env.NODE_ENV === "production") {
+      allowed = allowed.filter((d) => d !== "localhost" && d !== "127.0.0.1");
+      if (allowed.length === 0) {
+        // If no allowed domains were provided for production, default to seatswap.net
+        allowed = ["seatswap.net"];
+      }
+    }
+    const messageDomainNormalized = (siweMessage.domain || "")
+      .toString()
+      .replace(/^https?:\/\//i, "")
+      .replace(/^www\./i, "")
+      .replace(/\/$/, "")
+      .toLowerCase();
+
+    if (!allowed.includes(messageDomainNormalized)) {
+      console.warn("SIWE domain mismatch", { messageDomain: siweMessage.domain, allowed });
       return res.status(400).json({ error: "Invalid domain" });
     }
     // Nonce - check against nonce store
