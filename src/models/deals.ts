@@ -23,7 +23,7 @@ const dealSchema = new mongoose.Schema({
   },
   buyerPaymentProof: { type: String, unique: true, sparse: true },
   completedTxHash: { type: String, unique: true, sparse: true },
-  escrowAddress: { type: String, required: true },
+  escrowAddress: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
