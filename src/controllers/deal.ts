@@ -210,7 +210,7 @@ export const buyerClaimDeal = async (
     }
 
     await Deal.updateOne(
-      { contractId: id },
+      { _id: id },
       {
         $set: {
           buyer: buyer._id,
