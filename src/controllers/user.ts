@@ -66,7 +66,15 @@ export const getUserInfo = async (
 
     const userProfile = await User.findOne({
       address: address.toLowerCase(),
-    });
+    })
+      .populate({
+        path: "sellerDeals",
+        populate: { path: "seller buyer", select: "address email ensName" },
+      })
+      .populate({
+        path: "buyerDeals",
+        populate: { path: "seller buyer", select: "address email ensName" },
+      });
 
     if (!userProfile) {
       return res.status(404).json({ error: "User not found" });
