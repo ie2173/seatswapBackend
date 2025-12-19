@@ -130,10 +130,9 @@ export const getDealById = async (
   }
 
   try {
-    const deal = await Deal.findById(dealId as string).populate(
-      "seller",
-      "address"
-    );
+    const deal = await Deal.findById(dealId as string)
+      .populate("seller", "address email ensName")
+      .populate("buyer", "address email ensName");
     if (!deal) {
       return res.status(404).json({ error: "Deal not found" });
     }
@@ -179,7 +178,7 @@ export const getUserDeals = async (
 /**
  * Buyer claims a deal
  * @param id - The ID of the deal to claim
- * @param buyerTransaction - The transaction ID of the buyer's payment
+ * @param EscrowAddress - The Address to the escrowContract created
  * @returns message - A success message
  * @throws 400 - If any required fields are missing or if the deal is not open
  * @throws 404 - If the deal or buyer is not found
@@ -190,9 +189,9 @@ export const buyerClaimDeal = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
-    const { id, buyerTransaction } = req.body;
+    const { id, escrowContract } = req.body;
     const address = req.user?.address;
-    if (!id || !buyerTransaction || !address) {
+    if (!id || !escrowContract || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -211,11 +210,11 @@ export const buyerClaimDeal = async (
     }
 
     await Deal.updateOne(
-      { _id: id },
+      { contractId: id },
       {
         $set: {
           buyer: buyer._id,
-          buyerTransaction: buyerTransaction,
+          escrowAddress: escrowContract,
           status: "pending",
         },
       }
@@ -344,6 +343,78 @@ export const confirmDelivery = async (
   } catch (error) {
     console.error("Error confirming delivery:", error);
     return res.status(500).json({ error: "Failed to confirm delivery" });
+  }
+};
+
+/**
+ * Get detailed information about a claimed deal including buyer/seller info and proof
+ * This is useful for the claimed deals section where both parties need to see each other's info
+ * @param dealId - The ID of the deal to get details for
+ * @returns deal - Full deal details with populated buyer and seller info including emails
+ */
+export const getClaimedDealDetails = async (
+  req: ExpressRequestWithUser,
+  res: ExpressResponseWithUser
+): AsyncExpressResponseWithUser => {
+  try {
+    const { dealId } = req.query;
+    const address = req.user?.address;
+
+    if (!dealId) {
+      return res.status(400).json({ error: "Missing deal ID" });
+    }
+
+    if (!address) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const deal = await Deal.findById(dealId as string)
+      .populate("seller", "address email ensName rating")
+      .populate("buyer", "address email ensName rating");
+
+    if (!deal) {
+      return res.status(404).json({ error: "Deal not found" });
+    }
+
+    // Verify that the requesting user is either the buyer or seller
+    const isBuyer =
+      deal.buyer &&
+      (deal.buyer as any).address.toLowerCase() === address.toLowerCase();
+    const isSeller =
+      (deal.seller as any).address.toLowerCase() === address.toLowerCase();
+
+    if (!isBuyer && !isSeller) {
+      return res
+        .status(403)
+        .json({ error: "User not authorized to view this deal" });
+    }
+
+    // Format response with all relevant info for claimed deals section
+    const response = {
+      deal: {
+        _id: deal._id,
+        title: deal.title,
+        contractId: deal.contractId,
+        quantity: deal.quantity,
+        price: deal.price,
+        status: deal.status,
+        escrowAddress: deal.escrowAddress,
+        createdAt: deal.createdAt,
+        updatedAt: deal.updatedAt,
+        seller: deal.seller,
+        buyer: deal.buyer,
+        sellerProof: deal.sellerProof,
+        completedTxHash: deal.completedTxHash,
+      },
+      userRole: isBuyer ? "buyer" : "seller",
+    };
+
+    return res.status(200).json({ success: true, data: response });
+  } catch (error) {
+    console.error("Error fetching claimed deal details:", error);
+    return res
+      .status(500)
+      .json({ error: "Failed to fetch claimed deal details" });
   }
 };
 

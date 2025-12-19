@@ -106,3 +106,36 @@ export const giveRating = async (
     return res.status(500).json({ error: "Failed to give rating" });
   }
 };
+
+export const getMyDeals = async (
+  req: ExpressRequestWithUser,
+  res: ExpressResponseWithUser
+): AsyncExpressResponseWithUser => {
+  try {
+    const address = req.user?.address;
+
+    if (!address) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    // Find the user by address and populate both buyer and seller deals
+    const user = await User.findOne({ address: address.toLowerCase() })
+      .populate("buyerDeals")
+      .populate("sellerDeals");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Combine buyer and seller deals
+    const allDeals = {
+      buyerDeals: user.buyerDeals,
+      sellerDeals: user.sellerDeals,
+    };
+
+    return res.status(200).json({ deals: allDeals });
+  } catch (error) {
+    console.error("Error fetching user deals:", error);
+    return res.status(500).json({ error: "Failed to fetch user deals" });
+  }
+};

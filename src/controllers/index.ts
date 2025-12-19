@@ -9,5 +9,7 @@ export {
   buyerClaimDeal,
   disputeDeal,
   completeDeal,
+  confirmDelivery,
+  getClaimedDealDetails,
 } from "./deal";
-export { addEmail, getUserInfo, giveRating } from "./user";
+export { addEmail, getUserInfo, giveRating, getMyDeals } from "./user";

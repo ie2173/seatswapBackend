@@ -9,6 +9,8 @@ import {
   disputeDeal,
   completeDeal,
   uploadSellerProof,
+  confirmDelivery,
+  getClaimedDealDetails,
 } from "@/controllers";
 import {
   authMiddleware,
@@ -25,6 +27,7 @@ const router = express.Router();
 router.get("/open-deals", getAllOpenDeals);
 router.get("/disputed-deals", getAllDisputedDeals);
 router.get("/deal", getDealById);
+router.get("/claimed-deal", authMiddleware, getClaimedDealDetails);
 
 // protected routes
 router.post("/list-tickets", authLimiter, authMiddleware, createTicketDeal);
@@ -44,5 +47,6 @@ router.post(
   disputeDeal
 );
 router.post("/complete-deal", authMiddleware, completeDeal);
+router.post("/confirm-delivery", authLimiter, authMiddleware, confirmDelivery);
 
 export default router;
