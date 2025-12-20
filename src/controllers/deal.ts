@@ -331,16 +331,13 @@ export const confirmDelivery = async (
         .status(403)
         .json({ error: "User not authorized to confirm delivery" });
     }
-    
+
     const updateData: any = { status: "completed" };
     if (txId) {
       updateData.buyerTransaction = txId;
     }
-    
-    await Deal.updateOne(
-      { _id: id },
-      { $set: updateData }
-    );
+
+    await Deal.updateOne({ _id: id }, { $set: updateData });
     return res
       .status(200)
       .json({ success: true, message: "Delivery confirmed" });
@@ -438,11 +435,11 @@ export const disputeDeal = async (
     const body = req.body || {};
     const { id } = body;
     const address = req.user?.address;
-    
+
     if (!id || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    
+
     // get deal schema by id
     const deal = await Deal.findById(id).populate("buyer seller");
     if (!deal) {
