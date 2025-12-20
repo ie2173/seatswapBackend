@@ -12,6 +12,9 @@ if (!process.env.RAILWAY_ENVIRONMENT) {
 
 // express app
 const app = express();
+// If app is behind a proxy (e.g. Railway, Heroku, nginx), trust first proxy
+// so express-rate-limit can use the X-Forwarded-For header safely.
+app.set("trust proxy", 1);
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 //Database
