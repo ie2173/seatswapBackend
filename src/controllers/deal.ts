@@ -251,9 +251,17 @@ export const uploadSellerProof = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
+    console.log("[uploadSellerProof] ===== BACKEND DEBUG =====");
+    console.log("[uploadSellerProof] req.body:", req.body);
+    console.log("[uploadSellerProof] req.file:", req.file);
+    console.log("[uploadSellerProof] req.user:", req.user);
     const { id, confirmationTxHash } = req.body;
     const image = req.file;
     const address = req.user?.address;
+    console.log("[uploadSellerProof] Parsed values:");
+    console.log("  id:", id);
+    console.log("  image exists:", !!image);
+    console.log("  address:", address);
     if (!id || !image || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -269,7 +277,7 @@ export const uploadSellerProof = async (
 
     // Upload proof to S3 (no on-chain verification required for seller proof)
     const s3Key = `proofs/${id}/${Date.now()}/Seller`;
-    const proofUrl = await uploadToS3({ file: proof, key: s3Key });
+    const proofUrl = await uploadToS3({ file: image, key: s3Key });
 
     const sellersProofObject: any = {
       url: proofUrl.url,
