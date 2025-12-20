@@ -34,10 +34,18 @@ router.post("/list-tickets", authLimiter, authMiddleware, createTicketDeal);
 router.post("/claim-deal", authLimiter, authMiddleware, buyerClaimDeal);
 router.post(
   "/seller-proof",
-  authLimiter,
   authMiddleware,
+  (req, res, next) => {
+    console.log("Before multer - Content-Type:", req.headers["content-type"]);
+    console.log("Before multer - body:", req.body);
+    next();
+  },
   fileUpload.single("image"),
-  handleUploadErrors,
+  (req, res, next) => {
+    console.log("After multer - file:", req.file);
+    console.log("After multer - body:", req.body);
+    next();
+  },
   uploadSellerProof
 );
 router.post(
