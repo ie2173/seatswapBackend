@@ -57,6 +57,11 @@ export const createTicketDeal = async (
     // Save to database
     await newDeal.save();
 
+    // Add deal to user's sellerDeals array
+    user.sellerDeals = user.sellerDeals || [];
+    user.sellerDeals.push(newDeal._id);
+    await user.save();
+
     // return success so frontend knows it works.
     return res.status(201).json({
       success: true,
@@ -262,23 +267,17 @@ export const uploadSellerProof = async (
         .json({ error: "User not authorized to upload proof" });
     }
 
-    // verify transaction on blockchain
-    const txReceipt = await publicClient.getTransactionReceipt({
-      hash: confirmationTxHash,
-    });
-    const proofClaimedEvent = txReceipt.logs.find((log) => {
-      if (log.address.toLowerCase() !== deal.escrowAddress.toLowerCase()) {
-        return false;
-      }
-    });
+    // Upload proof to S3 (no on-chain verification required for seller proof)
     const s3Key = `proofs/${id}/${Date.now()}/Seller`;
-    // send image to AWS S3 and get the URL
     const proofUrl = await uploadToS3({ file: proof, key: s3Key });
-    const sellersProofObject = {
+
+    const sellersProofObject: any = {
       url: proofUrl.url,
-      confirmationTxHash,
       updatedAt: new Date(),
     };
+    if (confirmationTxHash) {
+      sellersProofObject.confirmationTxHash = confirmationTxHash;
+    }
 
     await Deal.updateOne(
       { _id: id },
