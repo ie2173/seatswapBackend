@@ -35,9 +35,9 @@ router.post("/claim-deal", authLimiter, authMiddleware, buyerClaimDeal);
 router.post(
   "/seller-proof",
   authLimiter,
+  authMiddleware,
   fileUpload.single("image"),
   handleUploadErrors,
-  authMiddleware,
   uploadSellerProof
 );
 router.post(

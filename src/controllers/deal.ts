@@ -252,9 +252,9 @@ export const uploadSellerProof = async (
 ): AsyncExpressResponseWithUser => {
   try {
     const { id, confirmationTxHash } = req.body;
-    const proof = req.file;
+    const image = req.file;
     const address = req.user?.address;
-    if (!id || !proof || !address) {
+    if (!id || !image || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const deal = await Deal.findById(id).populate("seller");
