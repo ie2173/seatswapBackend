@@ -251,18 +251,20 @@ export const uploadSellerProof = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
-    console.log("[uploadSellerProof] ===== BACKEND DEBUG =====");
-    console.log("[uploadSellerProof] req.body:", req.body);
-    console.log("[uploadSellerProof] req.file:", req.file);
-    console.log("[uploadSellerProof] req.user:", req.user);
-    const { id, confirmationTxHash } = req.body;
+    // defensive parse: req.body may be undefined if body-parsers/multer ordering
+    const body = req.body || {};
+    const id =
+      (body as any).id || (req.query && (req.query.dealId || req.query.id));
+    const confirmationTxHash = (body as any).confirmationTxHash;
     const image = req.file;
     const address = req.user?.address;
-    console.log("[uploadSellerProof] Parsed values:");
-    console.log("  id:", id);
-    console.log("  image exists:", !!image);
-    console.log("  address:", address);
+
     if (!id || !image || !address) {
+      console.log("[uploadSellerProof] Missing fields", {
+        id,
+        imageExists: !!image,
+        address,
+      });
       return res.status(400).json({ error: "Missing required fields" });
     }
     const deal = await Deal.findById(id).populate("seller");
