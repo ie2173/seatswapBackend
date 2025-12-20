@@ -323,7 +323,10 @@ export const confirmDelivery = async (
       return res.status(400).json({ error: "Missing required fields" });
     }
     const deal = await Deal.findById(id).populate("buyer");
-    if (!deal || deal.status !== "claimed") {
+    if (
+      !deal ||
+      (deal.status !== "claimed" && deal.status !== "proof_uploaded")
+    ) {
       return res.status(404).json({ error: "Deal not found" });
     }
     if ((deal.buyer as any).address.toLowerCase() !== address.toLowerCase()) {
