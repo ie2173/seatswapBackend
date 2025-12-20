@@ -232,7 +232,7 @@ Create `test/integration/` directory with:
 - [ ] `uploadSellerProof`: Add file type validation (only images)
 - [ ] `uploadSellerProof`: Add file size validation (max 5MB)
 - [ ] `uploadSellerProof`: Verify user is actually the seller (currently missing check)
-- [ ] `uploadSellerProof`: Fix status check - should check for "claimed" not "pending"
+- [x] `uploadSellerProof`: Fix status check - now correctly checks for "claimed" status
 - [ ] `disputeDeal`: Add status validation (only allow disputes on active deals)
 - [ ] `disputeDeal`: Check deal status before allowing dispute (not "open" or "completed")
 - [ ] `completeDeal`: Add authorization check (only buyer should complete)

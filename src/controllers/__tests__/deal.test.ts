@@ -183,7 +183,7 @@ describe("Deal Controller", () => {
         price: 200,
         seller: user._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending", // Changed from "claimed" to valid status
+        status: "claimed",
       });
 
       await Deal.create({
@@ -387,7 +387,7 @@ describe("Deal Controller", () => {
         seller: buyer._id,
         buyer: seller._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       await User.updateOne(
@@ -457,7 +457,7 @@ describe("Deal Controller", () => {
         price: 100,
         seller: seller._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       const req = createMockRequest({
@@ -552,7 +552,7 @@ describe("Deal Controller", () => {
 
       // Verify the deal was updated
       const updatedDeal = await Deal.findById(deal._id);
-      expect(updatedDeal?.status).toBe("pending");
+      expect(updatedDeal?.status).toBe("claimed");
       expect(updatedDeal?.buyer?.toString()).toBe(buyer._id.toString());
       // Note: buyerPaymentProof would need to be set in the controller to verify here
 
@@ -598,7 +598,7 @@ describe("Deal Controller", () => {
       expect(getData().error).toBe("Deal not found");
     });
 
-    test("should return 400 if deal is not in pending status", async () => {
+    test("should return 400 if deal is not in claimed status", async () => {
       const seller = await User.create({
         address: "0x742d35cc6634c0532925a3b844bc9e7595f0beb",
         nonce: "testnonce12345",
@@ -643,13 +643,13 @@ describe("Deal Controller", () => {
       });
 
       const deal = await Deal.create({
-        title: "Pending Deal",
+        title: "Claimed Deal",
         quantity: 1,
         price: 100,
         seller: seller._id,
         buyer: buyer._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       const req = createMockRequest({
@@ -733,7 +733,7 @@ describe("Deal Controller", () => {
       expect(getData().error).toBe("Missing required fields");
     });
 
-    test("should return 404 if deal not found or not pending", async () => {
+    test("should return 404 if deal not found or not claimed", async () => {
       const mockFile = createMockFile();
       const req = createMockRequest({
         body: {
@@ -761,12 +761,12 @@ describe("Deal Controller", () => {
       });
 
       const deal = await Deal.create({
-        title: "Pending Deal",
+        title: "Claimed Deal",
         quantity: 1,
         price: 100,
         seller: seller._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       const mockFile = createMockFile();
@@ -807,7 +807,7 @@ describe("Deal Controller", () => {
       expect(getData().error).toBe("Missing required fields");
     });
 
-    test("should return 404 if deal not found or not pending", async () => {
+    test("should return 404 if deal not found or not claimed", async () => {
       const req = createMockRequest({
         body: {
           id: "507f1f77bcf86cd799439011",
@@ -838,13 +838,13 @@ describe("Deal Controller", () => {
       });
 
       const deal = await Deal.create({
-        title: "Pending Deal",
+        title: "Claimed Deal",
         quantity: 1,
         price: 100,
         seller: seller._id,
         buyer: buyer._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       const req = createMockRequest({
@@ -890,12 +890,12 @@ describe("Deal Controller", () => {
       });
 
       const deal = await Deal.create({
-        title: "Pending Deal",
+        title: "Claimed Deal",
         quantity: 1,
         price: 100,
         seller: seller._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       const req = createMockRequest({
@@ -921,13 +921,13 @@ describe("Deal Controller", () => {
       });
 
       const deal = await Deal.create({
-        title: "Pending Deal",
+        title: "Claimed Deal",
         quantity: 1,
         price: 100,
         seller: seller._id,
         buyer: buyer._id,
         escrowAddress: "0x1234567890abcdef1234567890abcdef12345678",
-        status: "pending",
+        status: "claimed",
       });
 
       const req = createMockRequest({

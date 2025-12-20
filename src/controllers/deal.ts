@@ -220,7 +220,7 @@ export const buyerClaimDeal = async (
         $set: {
           buyer: buyer._id,
           escrowAddress: escrowContract,
-          status: "pending",
+          status: "claimed",
         },
       }
     );
@@ -268,7 +268,7 @@ export const uploadSellerProof = async (
       return res.status(400).json({ error: "Missing required fields" });
     }
     const deal = await Deal.findById(id).populate("seller");
-    if (!deal || deal.status !== "pending") {
+    if (!deal || deal.status !== "claimed") {
       return res.status(404).json({ error: "Deal not found" });
     }
     if ((deal.seller as any).address.toLowerCase() !== address.toLowerCase()) {
@@ -304,7 +304,8 @@ export const uploadSellerProof = async (
 
 /**
  * Buyer confirms that the seller has released the tickets to the buyer.
- * @param id - The ID of the deal to upload proof for
+ * @param id - The ID of the deal to complete
+ * @param txId - Optional transaction ID of the buyer's payment
  * @returns message - A success message
  * @throws 400 - If any required fields are missing or if the deal is not claimed
  * @throws 404 - If the deal is not found
@@ -315,13 +316,14 @@ export const confirmDelivery = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
-    const { id, confirmationTxHash } = req.body;
+    const body = req.body || {};
+    const { id, txId } = body;
     const address = req.user?.address;
     if (!id || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const deal = await Deal.findById(id).populate("buyer");
-    if (!deal || deal.status !== "pending") {
+    if (!deal || deal.status !== "claimed") {
       return res.status(404).json({ error: "Deal not found" });
     }
     if ((deal.buyer as any).address.toLowerCase() !== address.toLowerCase()) {
@@ -329,22 +331,15 @@ export const confirmDelivery = async (
         .status(403)
         .json({ error: "User not authorized to confirm delivery" });
     }
-    // confirm transaction on blockchain before confirming in database
-    const confirmationResult = await confirmConfimation({
-      user: address as Address,
-      transactionId: parseInt(id),
-      escrowAddress: deal.escrowAddress as Address,
-      txHash: confirmationTxHash as Hash,
-    });
-
-    if (!confirmationResult.confirmed) {
-      return res
-        .status(400)
-        .json({ error: "Transaction not confirmed on blockchain" });
+    
+    const updateData: any = { status: "completed" };
+    if (txId) {
+      updateData.buyerTransaction = txId;
     }
+    
     await Deal.updateOne(
       { _id: id },
-      { $set: { status: "completed", completedTxHash: confirmationTxHash } }
+      { $set: updateData }
     );
     return res
       .status(200)
@@ -440,16 +435,18 @@ export const disputeDeal = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
-    const { id } = req.body;
+    const body = req.body || {};
+    const { id } = body;
     const address = req.user?.address;
+    
+    if (!id || !address) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
     // get deal schema by id
     const deal = await Deal.findById(id).populate("buyer seller");
     if (!deal) {
       return res.status(404).json({ error: "Deal not found" });
-    }
-
-    if (!address) {
-      return res.status(401).json({ error: "User not authenticated" });
     }
 
     const userAddress = address.toLowerCase();
@@ -464,69 +461,14 @@ export const disputeDeal = async (
         .json({ error: "Only buyer or seller can dispute this deal" });
     }
 
-    // send transaction to blockchain to dispute the deal
-    const txHash = await walletClient.writeContract({
-      address: seatSwapFactoryContract.address,
-      abi: seatSwapFactoryContract.ABI,
-      functionName: "createDispute",
-      args: [id],
-    });
-
-    const txConfirmation = await publicClient.waitForTransactionReceipt({
-      hash: txHash,
-    });
-
-    if (txConfirmation.status !== "success") {
-      return res
-        .status(400)
-        .json({ error: "Failed to create dispute on blockchain" });
-    }
-
     await Deal.updateOne({ _id: id }, { $set: { status: "disputed" } });
 
     return res
       .status(200)
-      .json({ success: true, message: "Dispute initiated", txHash });
+      .json({ success: true, message: "Dispute initiated" });
   } catch (error) {
     console.error("Error disputing deal:", error);
     return res.status(500).json({ error: "Failed to dispute deal" });
-  }
-};
-
-/**
- * Complete a deal
- * @param id - The ID of the deal to complete
- * @param txId - The transaction ID of the buyer's payment
- * @returns message - A success message
- * @throws 400 - If any required fields are missing or if the deal is not claimed
- * @throws 404 - If the deal is not found
- * @throws 500 - If there is an error completing the deal
- */
-export const completeDeal = async (
-  req: ExpressRequestWithUser,
-  res: ExpressResponseWithUser
-): AsyncExpressResponseWithUser => {
-  try {
-    const { id, txId } = req.body;
-    const address = req.user?.address;
-    if (!id || !txId || !address) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-    const deal = await Deal.findById(id);
-    if (!deal) {
-      return res.status(404).json({ error: "Deal not found" });
-    }
-    if (deal.status !== "pending") {
-      return res.status(400).json({ error: "Deal is not claimed" });
-    }
-    await Deal.updateOne(
-      { _id: id },
-      { $set: { buyerTransaction: txId, status: "completed" } }
-    );
-    return res.status(200).json({ success: true, message: "Deal completed" });
-  } catch (error) {
-    console.error("Error completing deal:", error);
-    return res.status(500).json({ error: "Failed to complete deal" });
   }
 };
 

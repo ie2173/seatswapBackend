@@ -8,7 +8,6 @@ export {
   uploadSellerProof,
   buyerClaimDeal,
   disputeDeal,
-  completeDeal,
   confirmDelivery,
   getClaimedDealDetails,
 } from "./deal";

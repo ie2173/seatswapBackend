@@ -413,7 +413,7 @@ describe("Integration Tests - Deal Lifecycle", () => {
 
     const data = (await response.json()) as { deal: any };
     expect(response.status).toBe(200);
-    expect(data.deal.status).toBe("pending");
+    expect(data.deal.status).toBe("claimed");
     expect(data.deal.buyer).toBe(buyerAccount.address);
   });
 

@@ -13,7 +13,7 @@ const dealSchema = new mongoose.Schema({
   disputeWinner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   status: {
     type: String,
-    enum: ["open", "completed", "cancelled", "disputed", "pending"],
+    enum: ["open", "completed", "cancelled", "disputed", "claimed"],
     default: "open",
   },
   sellerProof: {
