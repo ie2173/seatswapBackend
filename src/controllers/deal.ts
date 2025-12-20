@@ -319,6 +319,14 @@ export const confirmDelivery = async (
     const body = req.body || {};
     const { id, txId } = body;
     const address = req.user?.address;
+    // Add this debugging
+    console.log("[confirmDelivery] Debug:", {
+      id,
+      hasUser: !!req.user,
+      address: address,
+      userObject: req.user,
+    });
+
     if (!id || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
