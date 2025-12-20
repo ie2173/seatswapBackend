@@ -317,20 +317,24 @@ export const confirmDelivery = async (
 ): AsyncExpressResponseWithUser => {
   try {
     const body = req.body || {};
-    const { id, txId } = body;
+    const { id, dealId, txId } = body;
+    const finalId = id || dealId; // Accept either 'id' or 'dealId'
     const address = req.user?.address;
-    // Add this debugging
+    
     console.log("[confirmDelivery] Debug:", {
       id,
+      dealId,
+      finalId,
+      txId,
       hasUser: !!req.user,
       address: address,
-      userObject: req.user,
+      rawBody: body,
     });
 
-    if (!id || !address) {
+    if (!finalId || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    const deal = await Deal.findById(id).populate("buyer");
+    const deal = await Deal.findById(finalId).populate("buyer");
     if (
       !deal ||
       (deal.status !== "claimed" && deal.status !== "proof_uploaded")
@@ -348,7 +352,7 @@ export const confirmDelivery = async (
       updateData.buyerTransaction = txId;
     }
 
-    await Deal.updateOne({ _id: id }, { $set: updateData });
+    await Deal.updateOne({ _id: finalId }, { $set: updateData });
     return res
       .status(200)
       .json({ success: true, message: "Delivery confirmed" });
