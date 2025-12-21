@@ -45,6 +45,7 @@ router.post(
     console.log("After multer - body:", req.body);
     next();
   },
+  handleUploadErrors,
   uploadSellerProof
 );
 router.post(

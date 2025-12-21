@@ -24,12 +24,12 @@ MongoDBConnection();
 app.use(corsMiddleware);
 app.use(apiLimiter);
 
-// Mount routes that handle multipart/form-data (file uploads) before
-// body parsers so multer can parse `req.file` correctly.
-app.use("/deals", dealRoutes);
-
+// Body parsers - need to be before most routes
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Mount routes
+app.use("/deals", dealRoutes);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.get("/health", (req: Request, res: Response) => {
