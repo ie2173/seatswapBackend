@@ -316,11 +316,13 @@ export const confirmDelivery = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
+    console.log("[confirmDelivery] Request received");
+    console.log("[confirmDelivery] Request body:", req.body);
     const body = req.body || {};
     const { id, dealId, txId } = body;
     const finalId = id || dealId; // Accept either 'id' or 'dealId'
     const address = req.user?.address;
-    
+
     console.log("[confirmDelivery] Debug:", {
       id,
       dealId,
