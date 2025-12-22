@@ -72,8 +72,11 @@ export const confirmSellerDelivery = async ({
   contractId,
 }: SettleDealParams): AsyncSettleDealResponse => {
   try {
-    console.log("[confirmSellerDelivery] Calling sellerConfirm for contractId:", contractId);
-    
+    console.log(
+      "[confirmSellerDelivery] Calling sellerConfirm for contractId:",
+      contractId
+    );
+
     // Call sellerConfirm on the Factory contract
     const txHash = await walletClient.writeContract({
       address: seatSwapFactoryContract.address,
@@ -119,8 +122,11 @@ export const settleDeal = async ({
   contractId,
 }: SettleDealParams): AsyncSettleDealResponse => {
   try {
-    console.log("[settleDeal] Calling buyerConfirm for contractId:", contractId);
-    
+    console.log(
+      "[settleDeal] Calling buyerConfirm for contractId:",
+      contractId
+    );
+
     // Call buyerConfirm on the Factory contract
     const txHash = await walletClient.writeContract({
       address: seatSwapFactoryContract.address,
