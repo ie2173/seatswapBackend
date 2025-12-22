@@ -454,7 +454,9 @@ export const disputeDeal = async (
     // defensive parse: req.body may be undefined if body-parsers/multer ordering
     const body = req.body || {};
     const id =
-      (body as any).id || (req.query && (req.query.dealId || req.query.id));
+      body.dealId ||
+      body.id ||
+      (req.query && (req.query.dealId || req.query.id));
     const address = req.user?.address;
     console.log("[disputeDeal] Debug:", {
       id,
