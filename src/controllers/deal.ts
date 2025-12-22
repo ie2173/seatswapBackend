@@ -507,10 +507,52 @@ export const resolveDispute = async (
   try {
     const { id, resolution } = req.body;
     const address = req.user?.address;
+
     if (!id || !resolution || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    return res.status(200).json({ success: true, message: "Dispute resolved" });
+
+    // Check if user is admin
+    const adminUser = await User.findOne({ address: address.toLowerCase() });
+    if (!adminUser || !adminUser.isAdmin) {
+      return res
+        .status(403)
+        .json({ error: "Unauthorized: Admin access required" });
+    }
+
+    // Find the deal and verify it's disputed
+    const deal = await Deal.findById(id).populate("buyer seller");
+    if (!deal) {
+      return res.status(404).json({ error: "Deal not found" });
+    }
+
+    if (deal.status !== "disputed") {
+      return res.status(400).json({ error: "Deal is not in disputed status" });
+    }
+
+    // Find the winner user by address
+    const winner = await User.findOne({ address: resolution.toLowerCase() });
+    if (!winner) {
+      return res.status(404).json({ error: "Winner address not found" });
+    }
+
+    // Update deal status to completed and set dispute winner
+    await Deal.updateOne(
+      { _id: id },
+      {
+        $set: {
+          status: "completed",
+          disputeWinner: winner._id,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Dispute resolved",
+      winner: resolution,
+    });
   } catch (error) {
     console.error("Error resolving dispute:", error);
     return res.status(500).json({ error: "Failed to resolve dispute" });

@@ -10,5 +10,6 @@ export {
   disputeDeal,
   confirmDelivery,
   getClaimedDealDetails,
+  resolveDispute,
 } from "./deal";
 export { addEmail, getUserInfo, giveRating, getMyDeals } from "./user";

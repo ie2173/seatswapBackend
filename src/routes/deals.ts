@@ -7,6 +7,7 @@ import {
   getUserDeals,
   buyerClaimDeal,
   disputeDeal,
+  resolveDispute,
   uploadSellerProof,
   confirmDelivery,
   getClaimedDealDetails,
@@ -54,6 +55,7 @@ router.post(
   authMiddleware,
   disputeDeal
 );
+router.post("/resolve-dispute", authLimiter, authMiddleware, resolveDispute);
 router.post("/confirm-delivery", authLimiter, authMiddleware, confirmDelivery);
 
 export default router;
