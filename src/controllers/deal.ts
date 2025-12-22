@@ -277,7 +277,7 @@ export const uploadSellerProof = async (
         .json({ error: "User not authorized to upload proof" });
     }
 
-    // Upload proof to S3 (no on-chain verification required for seller proof)
+    // Upload proof to S3
     const s3Key = `proofs/${id}/${Date.now()}/Seller`;
     const proofUrl = await uploadToS3({ file: image, key: s3Key });
 
@@ -449,11 +449,14 @@ export const disputeDeal = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
+    // defensive parse: req.body may be undefined if body-parsers/multer ordering
     const body = req.body || {};
-    const { id } = body;
+    const id =
+      (body as any).id || (req.query && (req.query.dealId || req.query.id));
     const address = req.user?.address;
 
     if (!id || !address) {
+      console.log("[disputeDeal] Missing fields", { id, address });
       return res.status(400).json({ error: "Missing required fields" });
     }
 
