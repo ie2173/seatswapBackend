@@ -449,11 +449,19 @@ export const disputeDeal = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
+    console.log("[disputeDeal] Request received");
+    console.log("[disputeDeal] Request body:", req.body);
     // defensive parse: req.body may be undefined if body-parsers/multer ordering
     const body = req.body || {};
     const id =
       (body as any).id || (req.query && (req.query.dealId || req.query.id));
     const address = req.user?.address;
+    console.log("[disputeDeal] Debug:", {
+      id,
+      hasUser: !!req.user,
+      address: address,
+      rawBody: body,
+    });
 
     if (!id || !address) {
       console.log("[disputeDeal] Missing fields", { id, address });
