@@ -110,6 +110,7 @@ export const getAllDisputedDeals = async (
       "seller",
       "address"
     );
+    console.log("Fetched disputed deals:", deals);
     return res.status(200).json({ success: true, data: deals });
   } catch (error) {
     console.error("Error fetching disputed deals:", error);
