@@ -84,10 +84,9 @@ export const getAllOpenDeals = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
-    const deals = await Deal.find({ status: "open" }).populate(
-      "seller",
-      "address"
-    );
+    const deals = await Deal.find({ status: "open" })
+      .populate("seller", "address email ensName rating")
+      .populate("buyer", "address email ensName rating");
     console.log("Fetched deals:", deals);
     return res.status(200).json({ success: true, data: deals });
   } catch (error) {
@@ -106,10 +105,9 @@ export const getAllDisputedDeals = async (
   res: ExpressResponseWithUser
 ): AsyncExpressResponseWithUser => {
   try {
-    const deals = await Deal.find({ status: "disputed" }).populate(
-      "seller",
-      "address"
-    );
+    const deals = await Deal.find({ status: "disputed" })
+      .populate("seller", "address email ensName rating")
+      .populate("buyer", "address email ensName rating");
     console.log("Fetched disputed deals:", deals);
     return res.status(200).json({ success: true, data: deals });
   } catch (error) {

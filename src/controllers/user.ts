@@ -126,10 +126,22 @@ export const getMyDeals = async (
       return res.status(401).json({ error: "User not authenticated" });
     }
 
-    // Find the user by address and populate both buyer and seller deals
+    // Find the user by address and populate both buyer and seller deals with user data
     const user = await User.findOne({ address: address.toLowerCase() })
-      .populate("buyerDeals")
-      .populate("sellerDeals");
+      .populate({
+        path: "buyerDeals",
+        populate: [
+          { path: "seller", select: "address email ensName rating" },
+          { path: "buyer", select: "address email ensName rating" },
+        ],
+      })
+      .populate({
+        path: "sellerDeals",
+        populate: [
+          { path: "seller", select: "address email ensName rating" },
+          { path: "buyer", select: "address email ensName rating" },
+        ],
+      });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
