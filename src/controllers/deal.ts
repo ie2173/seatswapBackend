@@ -556,3 +556,53 @@ export const resolveDispute = async (
     return res.status(500).json({ error: "Failed to resolve dispute" });
   }
 };
+
+/** Cancel a deal by its ID so it is no longer claimable
+ * @param id - The ID of the deal to cancel
+ * @returns message - A success message
+ * @throws 400 - If the deal ID is missing or if the deal is not open
+ * @throws 404 - If the deal is not found
+ * @throws 500 - If there is an error cancelling the deal
+ */
+export const cancelDeal = async (
+  req: ExpressRequestWithUser,
+  res: ExpressResponseWithUser
+): AsyncExpressResponseWithUser => {
+  try {
+    const { dealId } = req.body;
+    const address = req.user?.address;
+
+    if (!dealId || !address) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const deal = await Deal.findById(dealId).populate("seller");
+    if (!deal) {
+      return res.status(404).json({ error: "Deal not found" });
+    }
+
+    if (deal.status !== "open") {
+      return res
+        .status(400)
+        .json({ error: "Only open deals can be cancelled" });
+    }
+
+    if ((deal.seller as any).address.toLowerCase() !== address.toLowerCase()) {
+      return res
+        .status(403)
+        .json({ error: "User not authorized to cancel this deal" });
+    }
+
+    await Deal.updateOne(
+      { _id: dealId },
+      { $set: { status: "cancelled", updatedAt: new Date() } }
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Deal cancelled successfully" });
+  } catch (error) {
+    console.error("Error cancelling deal:", error);
+    return res.status(500).json({ error: "Failed to cancel deal" });
+  }
+};

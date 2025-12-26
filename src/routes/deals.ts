@@ -11,6 +11,7 @@ import {
   uploadSellerProof,
   confirmDelivery,
   getClaimedDealDetails,
+  cancelDeal,
 } from "@/controllers";
 import {
   authMiddleware,
@@ -57,5 +58,6 @@ router.post(
 );
 router.post("/resolve-dispute", authLimiter, authMiddleware, resolveDispute);
 router.post("/confirm-delivery", authLimiter, authMiddleware, confirmDelivery);
+router.post("/cancel-deal", authLimiter, authMiddleware, cancelDeal);
 
 export default router;
