@@ -11,5 +11,6 @@ export {
   confirmDelivery,
   getClaimedDealDetails,
   resolveDispute,
+  cancelDeal,
 } from "./deal";
 export { addEmail, getUserInfo, giveRating, getMyDeals } from "./user";
